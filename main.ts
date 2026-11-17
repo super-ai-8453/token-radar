@@ -1,12 +1,23 @@
 /**
  * token-radar — fetch fresh Solana pairs from DexScreener, score them, and
- * publish the results as JSON plus a static HTML page.
+ * publish the results as JSON plus a static HTML dashboard.
+ *
+ * make.fun program/v1 harness protocol:
+ *   - HTTP server on an OS-assigned ephemeral port (listen(0), never hardcoded)
+ *   - on listen: POST {"port": N} to MAKEFUN_ENV_URL + "/register"
+ *   - GET /healthz      -> 200 {"ok":true}
+ *   - GET /             -> dashboard HTML
+ *   - GET /signals.json -> the radar report JSON
+ *   - background refresh every 60s; last good data kept on fetch failure
+ *   - long-poll MAKEFUN_ENV_URL + "/done"; process.exit(0) when it returns
+ *   - MAKEFUN_ENV_URL unset: still listen, log "registration skipped"
  *
  * Node 22, TypeScript (type stripping), Node builtins only.
  * Run with: npm start
  */
 
 import { mkdir, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,6 +34,11 @@ const REQUEST_TIMEOUT_MS = 10_000;
 const MIN_LIQUIDITY_USD = 20_000;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const TOP_N = 20;
+const REFRESH_INTERVAL_MS = 60_000;
+const REGISTER_ATTEMPTS = 5;
+const REGISTER_RETRY_DELAY_MS = 2_000;
+const DONE_POLL_TIMEOUT_MS = 5 * 60_000;
+const DONE_RETRY_DELAY_MS = 5_000;
 
 /** Score weights; each component is log-normalised to 0-100 first. */
 const WEIGHTS = { liquidity: 0.3, volume: 0.4, txns: 0.3 } as const;
@@ -653,27 +669,29 @@ ${body}
 }
 
 /* ------------------------------------------------------------------ */
-/* Main                                                                */
+/* Radar state                                                         */
 /* ------------------------------------------------------------------ */
 
-async function main(): Promise<void> {
-  const now = Date.now();
+interface RadarState {
+  report: RadarReport;
+  html: string;
+  json: string;
+}
 
-  let tokens: string[] = [];
-  let pairs: DexPair[] = [];
+/**
+ * Latest radar output. Served by GET / and GET /signals.json, and written to
+ * static/index.html and out/signals.json on every successful refresh.
+ */
+let radarState: RadarState = buildRadarState([], [], Date.now());
 
-  try {
-    const discovered = await fetchDiscoveredTokens();
-    tokens = discovered.tokens;
-    for (const warning of discovered.warnings) {
-      console.error(`warning: ${warning}`);
-    }
-    pairs = await fetchPairs(tokens);
-  } catch (error) {
-    // Graceful: keep going and publish empty artefacts rather than crashing.
-    console.error(`warning: radar fetch failed: ${errorMessage(error)}`);
-  }
+/** True once at least one fetch pass has completed without throwing. */
+let hasGoodData = false;
 
+function buildRadarState(
+  tokens: readonly string[],
+  pairs: readonly DexPair[],
+  now: number,
+): RadarState {
   const signals = buildSignals(pairs, now);
   const top = signals.slice(0, TOP_N);
 
@@ -690,23 +708,186 @@ async function main(): Promise<void> {
     signals,
   };
 
+  return {
+    report,
+    html: renderPage(report, top),
+    json: `${JSON.stringify(report, null, 2)}\n`,
+  };
+}
+
+/**
+ * Run one radar pass and publish the artefacts. If a fetch fails and we
+ * already hold good data, the previous state is kept untouched.
+ */
+async function refreshRadar(): Promise<void> {
+  const now = Date.now();
+
+  let tokens: string[] = [];
+  let pairs: DexPair[] = [];
+  let fetchFailed = false;
+
+  try {
+    const discovered = await fetchDiscoveredTokens();
+    tokens = discovered.tokens;
+    for (const warning of discovered.warnings) {
+      console.error(`warning: ${warning}`);
+    }
+    pairs = await fetchPairs(tokens);
+  } catch (error) {
+    // Graceful: keep the last good data (or publish an empty report on the
+    // very first pass) rather than crashing.
+    fetchFailed = true;
+    console.error(`warning: radar fetch failed: ${errorMessage(error)}`);
+  }
+
+  if (fetchFailed && hasGoodData) {
+    console.error("warning: radar fetch failed; keeping last good data");
+    return;
+  }
+
+  radarState = buildRadarState(tokens, pairs, now);
+  hasGoodData = true;
+
   await Promise.all([
     mkdir(OUT_DIR, { recursive: true }),
     mkdir(STATIC_DIR, { recursive: true }),
   ]);
 
   await Promise.all([
-    writeFile(
-      join(OUT_DIR, "signals.json"),
-      `${JSON.stringify(report, null, 2)}\n`,
-      "utf8",
-    ),
-    writeFile(join(STATIC_DIR, "index.html"), renderPage(report, top), "utf8"),
+    writeFile(join(OUT_DIR, "signals.json"), radarState.json, "utf8"),
+    writeFile(join(STATIC_DIR, "index.html"), radarState.html, "utf8"),
   ]);
 
   console.log(`tokens discovered: ${tokens.length}`);
-  console.log(`signals: ${signals.length}`);
-  console.log("done");
+  console.log(`signals: ${radarState.report.count}`);
+}
+
+/* ------------------------------------------------------------------ */
+/* Harness protocol                                                    */
+/* ------------------------------------------------------------------ */
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+/** POST {"port": <port>} to MAKEFUN_ENV_URL + "/register". */
+async function registerWithHarness(envUrl: string, port: number): Promise<void> {
+  const url = `${envUrl.replace(/\/+$/, "")}/register`;
+
+  for (let attempt = 1; attempt <= REGISTER_ATTEMPTS; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ port }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`.trim());
+      }
+
+      console.log(`registered with ${url} (HTTP ${response.status})`);
+      return;
+    } catch (error) {
+      console.error(`warning: registration attempt ${attempt} failed: ${errorMessage(error)}`);
+      if (attempt < REGISTER_ATTEMPTS) {
+        await sleep(REGISTER_RETRY_DELAY_MS);
+      }
+    }
+  }
+}
+
+/** Long-poll MAKEFUN_ENV_URL + "/done" and exit 0 once it returns. */
+async function waitForDone(envUrl: string): Promise<void> {
+  const url = `${envUrl.replace(/\/+$/, "")}/done`;
+
+  for (;;) {
+    try {
+      const response = await fetch(url, {
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(DONE_POLL_TIMEOUT_MS),
+      });
+      console.log(`/done returned HTTP ${response.status}; exiting`);
+      process.exit(0);
+    } catch (error) {
+      console.error(`warning: /done poll failed: ${errorMessage(error)}`);
+      await sleep(DONE_RETRY_DELAY_MS);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Main                                                                */
+/* ------------------------------------------------------------------ */
+
+async function main(): Promise<void> {
+  // First pass plus a background refresh every 60s; failures keep the last
+  // good data.
+  void refreshRadar();
+  setInterval(() => {
+    void refreshRadar();
+  }, REFRESH_INTERVAL_MS);
+
+  const server = createServer((request, response) => {
+    const url = new URL(request.url ?? "/", "http://localhost");
+    const method = (request.method ?? "GET").toUpperCase();
+
+    if (method !== "GET" && method !== "HEAD") {
+      response.writeHead(405, { "content-type": "text/plain; charset=utf-8" });
+      response.end("method not allowed");
+      return;
+    }
+
+    switch (url.pathname) {
+      case "/healthz": {
+        response.writeHead(200, {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+        });
+        response.end('{"ok":true}');
+        return;
+      }
+      case "/": {
+        response.writeHead(200, {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+        });
+        response.end(radarState.html);
+        return;
+      }
+      case "/signals.json": {
+        response.writeHead(200, {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+        });
+        response.end(radarState.json);
+        return;
+      }
+      default: {
+        response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+        response.end("not found");
+      }
+    }
+  });
+
+  // Let the OS pick a free port; never hardcode one.
+  server.listen(0, () => {
+    const address = server.address();
+    const port = typeof address === "object" && address !== null ? address.port : 0;
+    console.log(`token-radar listening on port ${port}`);
+
+    const envUrl = process.env.MAKEFUN_ENV_URL;
+    if (envUrl === undefined || envUrl.trim() === "") {
+      console.log("registration skipped");
+      return;
+    }
+
+    void registerWithHarness(envUrl, port);
+    void waitForDone(envUrl);
+  });
 }
 
 main().catch((error: unknown) => {

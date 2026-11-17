@@ -1,0 +1,25 @@
+{
+ "format": "makefun-run/1",
+ "prompt": {
+  "text": "Sure, start the token-radar-01 build on the working free-model path. And then request me for the Thirdeye AI 'sk-thirdeye-' API key, I will provide you.",
+  "origin": "handed-off",
+  "via": "the owner typed this in chat with his coordinating agent, which relayed it verbatim into a headless Ori/Claude Code session (the session's own first message is the agent's task brief, not the owner's words)"
+ },
+ "system_prompt": {
+  "status": "withheld",
+  "why": "the run was headless under Ori's injected settings and the harness's system prompt is not exposed in the recorded session"
+ },
+ "instructions": {
+  "status": "none",
+  "why": null
+ },
+ "mcp_servers": [],
+ "declared": {
+  "harness": "Claude Code",
+  "harness_version": "2.1.326",
+  "provider": "OpenRouter",
+  "model": "baidu/ernie-5.5-flash-preview:free",
+  "reasoning_effort": null,
+  "notes": "Two recorded sessions: the first used inclusionai/ling-3.2-flash:free and the data-source fix used baidu/ernie-5.5-flash-preview:free. Both are zero-cost OpenRouter free models. Node 22.23.5. No MCP servers used."
+ }
+}
