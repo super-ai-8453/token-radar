@@ -1,0 +1,296 @@
+{
+  "generatedAt": "2026-11-17T11:00:32.748Z",
+  "chain": "solana",
+  "sources": [
+    "https://api.dexscreener.com/token-profiles/latest/v1",
+    "https://api.dexscreener.com/token-boosts/latest/v1",
+    "https://api.dexscreener.com/latest/dex/tokens"
+  ],
+  "filters": {
+    "minLiquidityUsd": 20000,
+    "maxAgeHours": 24
+  },
+  "tokensDiscovered": 46,
+  "count": 9,
+  "signals": [
+    {
+      "rank": 1,
+      "score": 56.5,
+      "scoreBreakdown": {
+        "liquidity": 25,
+        "volume": 47.4,
+        "txns": 100
+      },
+      "baseToken": {
+        "symbol": "LEOSTAR",
+        "name": "Leonida Games",
+        "address": "2cMcMEX3Eqo86tUrVe5dgHp5GZNwqQ6crqm22UeZpump"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "Hm7Nvb4bxSDYZhtbm2yHEMHCMC6Lq4XTedY4q1we9r7Q",
+      "url": "https://dexscreener.com/solana/hm7nvb4bxsdyzhtbm2yhemhcmc6lq4xtedy4q1we9r7q",
+      "priceUsd": 0.001172,
+      "priceChange24h": 3633,
+      "liquidityUsd": 79567.34,
+      "volume24h": 1320738.11,
+      "txns24h": {
+        "buys": 112294,
+        "sells": 78528,
+        "total": 190822
+      },
+      "fdv": 1159225,
+      "pairCreatedAt": 1794870149000,
+      "ageMinutes": 718
+    },
+    {
+      "rank": 2,
+      "score": 56.3,
+      "scoreBreakdown": {
+        "liquidity": 25.7,
+        "volume": 46.4,
+        "txns": 100
+      },
+      "baseToken": {
+        "symbol": "GTA",
+        "name": "Grand Theft Anthropic",
+        "address": "2NWgu4fqN2AxS5pp5v3f3SH54qArP9JepQFJm58gpump"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "7TiCdhJE5YHWgrAs8v1EXxxvAJy9eTbzVq97nFgqDhYt",
+      "url": "https://dexscreener.com/solana/7ticdhje5yhwgras8v1exxxvajy9etbzvq97nfgqdhyt",
+      "priceUsd": 0.001256,
+      "priceChange24h": 3824,
+      "liquidityUsd": 82574.97,
+      "volume24h": 1234785.2,
+      "txns24h": {
+        "buys": 22421,
+        "sells": 16016,
+        "total": 38437
+      },
+      "fdv": 1243888,
+      "pairCreatedAt": 1794851799000,
+      "ageMinutes": 1023
+    },
+    {
+      "rank": 3,
+      "score": 53,
+      "scoreBreakdown": {
+        "liquidity": 9,
+        "volume": 50.8,
+        "txns": 100
+      },
+      "baseToken": {
+        "symbol": "CHAR",
+        "name": "Onchain Chars",
+        "address": "9k2nqjUrSh9p2ZBnWxNE3QRWYiLocrWZfoDm3Vdxpump"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "J5JQhQtLcLU24ZTbJ85oqgX2rSkv1BgS7Kteo8fLHtGU",
+      "url": "https://dexscreener.com/solana/j5jqhqtlclu24ztbj85oqgx2rskv1bgs7kteo8flhtgu",
+      "priceUsd": 0.000181,
+      "priceChange24h": 502,
+      "liquidityUsd": 32829.13,
+      "volume24h": 1668947.2,
+      "txns24h": {
+        "buys": 19978,
+        "sells": 15845,
+        "total": 35823
+      },
+      "fdv": 177944,
+      "pairCreatedAt": 1794881460000,
+      "ageMinutes": 529
+    },
+    {
+      "rank": 4,
+      "score": 50.7,
+      "scoreBreakdown": {
+        "liquidity": 6.6,
+        "volume": 46.9,
+        "txns": 100
+      },
+      "baseToken": {
+        "symbol": "ETF",
+        "name": "Emotional Trauma Fund",
+        "address": "Gg5aWvfucyMwihDzyfCEaLgyeeNE2dkob2LTwWfHpump"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "F6mmrJcbtVcwSZrufYUiyJAKucYzGS6dJNUcxSF2caPa",
+      "url": "https://dexscreener.com/solana/f6mmrjcbtvcwszrufyuiyjakucyzgs6djnucxsf2capa",
+      "priceUsd": 0.0001512,
+      "priceChange24h": 387,
+      "liquidityUsd": 28723.81,
+      "volume24h": 1272114.69,
+      "txns24h": {
+        "buys": 9217,
+        "sells": 5935,
+        "total": 15152
+      },
+      "fdv": 148625,
+      "pairCreatedAt": 1794852061000,
+      "ageMinutes": 1019
+    },
+    {
+      "rank": 5,
+      "score": 42.1,
+      "scoreBreakdown": {
+        "liquidity": 2.3,
+        "volume": 28.4,
+        "txns": 100
+      },
+      "baseToken": {
+        "symbol": "COGE",
+        "name": "COGE",
+        "address": "BRf3SXRk8BdXmBZDJfKyEhbYmqBVf8843ctEMcD4pump"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "AQMZyR924xnhXjp8otFyUqTGQafuxJdLiBBeXmfAuWJS",
+      "url": "https://dexscreener.com/solana/aqmzyr924xnhxjp8otfyuqtgqafuxjdlibbexmfauwjs",
+      "priceUsd": 0.000108,
+      "priceChange24h": 260,
+      "liquidityUsd": 22707.56,
+      "volume24h": 355796.08,
+      "txns24h": {
+        "buys": 5442,
+        "sells": 2811,
+        "total": 8253
+      },
+      "fdv": 106225,
+      "pairCreatedAt": 1794851537000,
+      "ageMinutes": 1028
+    },
+    {
+      "rank": 6,
+      "score": 41.3,
+      "scoreBreakdown": {
+        "liquidity": 4.3,
+        "volume": 24.9,
+        "txns": 100
+      },
+      "baseToken": {
+        "symbol": "Millionaires",
+        "name": "Millionaires",
+        "address": "CMHDMepwM1pAuNr3YXFkMvyLT3J8GCq2RafufpKypump"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "Atito4yBo7whSJkmqBtPPiUmtb9xjWs7QfZZFSpLfXxo",
+      "url": "https://dexscreener.com/solana/atito4ybo7whsjkmqbtppiumtb9xjws7qfzzfsplfxxo",
+      "priceUsd": 0.0001264,
+      "priceChange24h": 336,
+      "liquidityUsd": 25404.79,
+      "volume24h": 279348.72,
+      "txns24h": {
+        "buys": 4863,
+        "sells": 3763,
+        "total": 8626
+      },
+      "fdv": 126237,
+      "pairCreatedAt": 1794911625000,
+      "ageMinutes": 26
+    },
+    {
+      "rank": 7,
+      "score": 37.1,
+      "scoreBreakdown": {
+        "liquidity": 11.3,
+        "volume": 15.5,
+        "txns": 91.6
+      },
+      "baseToken": {
+        "symbol": "GTAVI",
+        "name": "Here We Go Again",
+        "address": "D7ZkNHN3ESProTmshXRjAgiNjQU7SkUcXHpe13qCpump"
+      },
+      "quoteToken": "WASTED",
+      "chainId": "solana",
+      "dexId": "pumpswap",
+      "pairAddress": "HM6q9iDBMcsQkBFnxaZtGGjTiJo5ocQTiHGwqnnuTToB",
+      "url": "https://dexscreener.com/solana/hm6q9idbmcsqkbfnxaztggjtijo5ocqtihgwqnnuttob",
+      "priceUsd": 0.0002578,
+      "priceChange24h": 753,
+      "liquidityUsd": 37400.53,
+      "volume24h": 145904.99,
+      "txns24h": {
+        "buys": 1273,
+        "sells": 1867,
+        "total": 3140
+      },
+      "fdv": 250967,
+      "pairCreatedAt": 1794890895000,
+      "ageMinutes": 372
+    },
+    {
+      "rank": 8,
+      "score": 19.8,
+      "scoreBreakdown": {
+        "liquidity": 6.7,
+        "volume": 0,
+        "txns": 59.4
+      },
+      "baseToken": {
+        "symbol": "GROKIA",
+        "name": "Grokia",
+        "address": "A4zQMT7ZFC2mM8fZDDQEqCs5bLFifA9XhDAJtHc3Lzbm"
+      },
+      "quoteToken": "SPCXx",
+      "chainId": "solana",
+      "dexId": "raydium",
+      "pairAddress": "4gy24R4fRDMBHNY2LxhwGoUCHpz6maqvWyVnKp2kyuP1",
+      "url": "https://dexscreener.com/solana/4gy24r4frdmbhny2lxhwgouchpz6maqvwyvnkp2kyup1",
+      "priceUsd": 0.0001629,
+      "priceChange24h": 393,
+      "liquidityUsd": 28981.07,
+      "volume24h": 43711.87,
+      "txns24h": {
+        "buys": 374,
+        "sells": 156,
+        "total": 530
+      },
+      "fdv": 162926,
+      "pairCreatedAt": 1794912811000,
+      "ageMinutes": 7
+    },
+    {
+      "rank": 9,
+      "score": 9.6,
+      "scoreBreakdown": {
+        "liquidity": 32,
+        "volume": 0,
+        "txns": 0
+      },
+      "baseToken": {
+        "symbol": "GROKIA",
+        "name": "Grokia",
+        "address": "A4zQMT7ZFC2mM8fZDDQEqCs5bLFifA9XhDAJtHc3Lzbm"
+      },
+      "quoteToken": "SOL",
+      "chainId": "solana",
+      "dexId": "meteora",
+      "pairAddress": "6HG9W5yNMQBpeEv3iCXiPUPYJY1wy7V7ELzkiSCLWX5u",
+      "url": "https://dexscreener.com/solana/6hg9w5ynmqbpeev3icxipupyjy1wy7v7elzkisclwx5u",
+      "priceUsd": 0.0001594,
+      "priceChange24h": -1.23,
+      "liquidityUsd": 117305.85,
+      "volume24h": 5.52,
+      "txns24h": {
+        "buys": 4,
+        "sells": 4,
+        "total": 8
+      },
+      "fdv": 159450,
+      "pairCreatedAt": 1794913079000,
+      "ageMinutes": 2
+    }
+  ]
+}

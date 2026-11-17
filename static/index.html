@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — fresh SOL launches</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0a0e13;
+    --panel: #121a24;
+    --panel-deep: #0e141c;
+    --border: #223042;
+    --text: #e7eef7;
+    --muted: #8fa1b7;
+    --accent: #38bdf8;
+    --high: #4ade80;
+    --mid: #fbbf24;
+    --low: #64748b;
+    --up: #4ade80;
+    --down: #f87171;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 520px at 15% -10%, #12263a 0%, transparent 65%),
+      var(--bg);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 20px 64px; }
+  .eyebrow {
+    margin: 0 0 8px;
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  h1 { margin: 0; font-size: clamp(1.9rem, 4vw, 2.8rem); letter-spacing: -0.02em; line-height: 1.1; }
+  .lede { max-width: 66ch; margin: 12px 0 0; color: var(--muted); }
+  .meta { margin: 16px 0 0; color: var(--muted); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+    margin-top: 32px;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-deep) 100%);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover { border-color: #35506e; transform: translateY(-2px); }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .identity { display: flex; gap: 10px; align-items: flex-start; min-width: 0; }
+  .rank { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .identity-text { min-width: 0; }
+  .symbol { margin: 0; font-size: 1.15rem; line-height: 1.2; overflow-wrap: anywhere; }
+  .name { margin: 2px 0 0; color: var(--muted); font-size: 0.8rem; overflow-wrap: anywhere; }
+  .score-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex: none; }
+  .score {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    min-width: 58px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .score-label { color: var(--muted); font-size: 0.65rem; letter-spacing: 0.04em; text-transform: uppercase; }
+  .score-high { color: #052e16; background: var(--high); }
+  .score-mid { color: #3b2600; background: var(--mid); }
+  .score-low { color: #e2e8f0; background: var(--low); }
+  .score-bar { height: 6px; overflow: hidden; border-radius: 999px; background: #1c2634; }
+  .score-bar > span { display: block; height: 100%; border-radius: 999px; }
+  .fill-high { background: linear-gradient(90deg, #16a34a, var(--high)); }
+  .fill-mid { background: linear-gradient(90deg, #d97706, var(--mid)); }
+  .fill-low { background: linear-gradient(90deg, #475569, #94a3b8); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 3px 9px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+    margin: 0;
+  }
+  .stats > div { min-width: 0; }
+  .stats dt {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .stats dd {
+    margin: 2px 0 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+  .txns { display: flex; gap: 14px; margin: 0; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+  .txns .buy { color: var(--up); }
+  .txns .sell { color: var(--down); }
+  .link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+    padding: 9px 14px;
+    border: 1px solid #2b3d54;
+    border-radius: 10px;
+    color: #cfe3ff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .link:hover { border-color: #3d5a7d; background: rgba(22, 35, 51, 0.6); }
+  .link:focus-visible, .card:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .empty {
+    margin-top: 32px;
+    padding: 40px 24px;
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .empty h2 { margin: 0 0 8px; color: var(--text); font-size: 1.2rem; }
+  .empty p { margin: 0 auto; max-width: 52ch; }
+  .foot { margin-top: 40px; color: var(--muted); font-size: 0.76rem; }
+  @media (prefers-reduced-motion: reduce) {
+    .card { transition: none; }
+    .card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <p class="eyebrow">Token Radar</p>
+    <h1>Fresh SOL launches, ranked</h1>
+    <p class="lede">Pairs created in the last 24 hours with at least $20,000 in liquidity. Each signal is scored 0–100 from liquidity (30%), 24h volume (40%), and 24h trade count (30%), each on a log scale.</p>
+    <p class="meta">Generated 2026-11-17 11:00:32 UTC · 9 signals · showing top 9</p>
+  </header>
+<section class="grid" aria-label="Top signals"><article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#1</span>
+      <div class="identity-text">
+        <h2 class="symbol">LEOSTAR</h2>
+        <p class="name">Leonida Games</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-mid">56.5</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 56.5 out of 100">
+    <span class="fill-mid" style="width:56.5%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">11h 58m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.001172</dd></div>
+    <div><dt>24h</dt><dd class="up">+3633.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$79.6K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$1.3M</dd></div>
+    <div><dt>Trades 24h</dt><dd>191K</dd></div>
+    <div><dt>FDV</dt><dd>$1.2M</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">112K buys</span><span class="sell">78.5K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/hm7nvb4bxsdyzhtbm2yhemhcmc6lq4xtedy4q1we9r7q" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#2</span>
+      <div class="identity-text">
+        <h2 class="symbol">GTA</h2>
+        <p class="name">Grand Theft Anthropic</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-mid">56.3</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 56.3 out of 100">
+    <span class="fill-mid" style="width:56.3%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">17h 3m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.001256</dd></div>
+    <div><dt>24h</dt><dd class="up">+3824.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$82.6K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$1.2M</dd></div>
+    <div><dt>Trades 24h</dt><dd>38.4K</dd></div>
+    <div><dt>FDV</dt><dd>$1.2M</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">22.4K buys</span><span class="sell">16K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/7ticdhje5yhwgras8v1exxxvajy9etbzvq97nfgqdhyt" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#3</span>
+      <div class="identity-text">
+        <h2 class="symbol">CHAR</h2>
+        <p class="name">Onchain Chars</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-mid">53.0</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 53.0 out of 100">
+    <span class="fill-mid" style="width:53%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">8h 49m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.000181</dd></div>
+    <div><dt>24h</dt><dd class="up">+502.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$32.8K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$1.7M</dd></div>
+    <div><dt>Trades 24h</dt><dd>35.8K</dd></div>
+    <div><dt>FDV</dt><dd>$178K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">20K buys</span><span class="sell">15.8K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/j5jqhqtlclu24ztbj85oqgx2rskv1bgs7kteo8flhtgu" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#4</span>
+      <div class="identity-text">
+        <h2 class="symbol">ETF</h2>
+        <p class="name">Emotional Trauma Fund</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-mid">50.7</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 50.7 out of 100">
+    <span class="fill-mid" style="width:50.7%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">16h 59m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.0001512</dd></div>
+    <div><dt>24h</dt><dd class="up">+387.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$28.7K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$1.3M</dd></div>
+    <div><dt>Trades 24h</dt><dd>15.2K</dd></div>
+    <div><dt>FDV</dt><dd>$149K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">9.2K buys</span><span class="sell">5.9K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/f6mmrjcbtvcwszrufyuiyjakucyzgs6djnucxsf2capa" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#5</span>
+      <div class="identity-text">
+        <h2 class="symbol">COGE</h2>
+        <p class="name">COGE</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-low">42.1</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 42.1 out of 100">
+    <span class="fill-low" style="width:42.1%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">17h 8m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.000108</dd></div>
+    <div><dt>24h</dt><dd class="up">+260.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$22.7K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$356K</dd></div>
+    <div><dt>Trades 24h</dt><dd>8.3K</dd></div>
+    <div><dt>FDV</dt><dd>$106K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">5.4K buys</span><span class="sell">2.8K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/aqmzyr924xnhxjp8otfyuqtgqafuxjdlibbexmfauwjs" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#6</span>
+      <div class="identity-text">
+        <h2 class="symbol">Millionaires</h2>
+        <p class="name">Millionaires</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-low">41.3</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 41.3 out of 100">
+    <span class="fill-low" style="width:41.3%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">26m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.0001264</dd></div>
+    <div><dt>24h</dt><dd class="up">+336.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$25.4K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$279K</dd></div>
+    <div><dt>Trades 24h</dt><dd>8.6K</dd></div>
+    <div><dt>FDV</dt><dd>$126K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">4.9K buys</span><span class="sell">3.8K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/atito4ybo7whsjkmqbtppiumtb9xjws7qfzzfsplfxxo" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#7</span>
+      <div class="identity-text">
+        <h2 class="symbol">GTAVI</h2>
+        <p class="name">Here We Go Again</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-low">37.1</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 37.1 out of 100">
+    <span class="fill-low" style="width:37.1%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">pumpswap</span>
+    <span class="chip">6h 12m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.0002578</dd></div>
+    <div><dt>24h</dt><dd class="up">+753.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$37.4K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$146K</dd></div>
+    <div><dt>Trades 24h</dt><dd>3.1K</dd></div>
+    <div><dt>FDV</dt><dd>$251K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">1.3K buys</span><span class="sell">1.9K sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/hm6q9idbmcsqkbfnxaztggjtijo5ocqtihgwqnnuttob" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#8</span>
+      <div class="identity-text">
+        <h2 class="symbol">GROKIA</h2>
+        <p class="name">Grokia</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-low">19.8</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 19.8 out of 100">
+    <span class="fill-low" style="width:19.8%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">raydium</span>
+    <span class="chip">7m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.0001629</dd></div>
+    <div><dt>24h</dt><dd class="up">+393.0%</dd></div>
+    <div><dt>Liquidity</dt><dd>$29K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$43.7K</dd></div>
+    <div><dt>Trades 24h</dt><dd>530</dd></div>
+    <div><dt>FDV</dt><dd>$163K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">374 buys</span><span class="sell">156 sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/4gy24r4frdmbhny2lxhwgouchpz6maqvwyvnkp2kyup1" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article>
+<article class="card">
+  <div class="card-top">
+    <div class="identity">
+      <span class="rank">#9</span>
+      <div class="identity-text">
+        <h2 class="symbol">GROKIA</h2>
+        <p class="name">Grokia</p>
+      </div>
+    </div>
+    <div class="score-wrap">
+      <span class="score score-low">9.6</span>
+      <span class="score-label">score / 100</span>
+    </div>
+  </div>
+
+  <div class="score-bar" role="img" aria-label="Score 9.6 out of 100">
+    <span class="fill-low" style="width:9.6%"></span>
+  </div>
+
+  <div class="chips">
+    <span class="chip">solana</span>
+    <span class="chip">meteora</span>
+    <span class="chip">2m old</span>
+  </div>
+
+  <dl class="stats">
+    <div><dt>Price</dt><dd>$0.0001594</dd></div>
+    <div><dt>24h</dt><dd class="down">-1.2%</dd></div>
+    <div><dt>Liquidity</dt><dd>$117K</dd></div>
+    <div><dt>Volume 24h</dt><dd>$5.5</dd></div>
+    <div><dt>Trades 24h</dt><dd>8</dd></div>
+    <div><dt>FDV</dt><dd>$159K</dd></div>
+  </dl>
+
+  <p class="txns"><span class="buy">4 buys</span><span class="sell">4 sells</span></p>
+
+  <a class="link" href="https://dexscreener.com/solana/6hg9w5ynmqbpeev3icxipupyjy1wy7v7elzkisclwx5u" target="_blank" rel="noopener noreferrer">View on DEX Screener ↗</a>
+</article></section>
+  <footer class="foot">Data: DexScreener latest token profiles &amp; boosts, resolved to pairs. Scores are a heuristic ranking aid, not financial advice.</footer>
+</main>
+</body>
+</html>
